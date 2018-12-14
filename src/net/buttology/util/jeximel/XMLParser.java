@@ -29,12 +29,14 @@ import java.util.Scanner;
  * This utility class can read and write XML files. When reading XML files, 
  * it returns a Document containing the XML data. Similarly, writing an 
  * XML file takes a Document as input and writes the contents to a file on disk.
- * @version 1.1.0
+ * @version 1.1.1
  * @author Mudbill
  */
 public class XMLParser {
 
+	/** Use this export option to write newline characters for each attribute in an inline element. Does not affect elements with children or text. */
 	public static final int OPTION_ATTR_NEWLINE_INLINE = 0x1;
+	/** Use this export option to write newline characters for each attribute an element has, regardless of context. */
 	public static final int OPTION_ATTR_NEWLINE_ALL = 0x2;
 	
 	/** Change this to true to print debug messages in the standard output. */
@@ -66,6 +68,13 @@ public class XMLParser {
 		return d;
 	}
 	
+	/**
+	 * Write the given XML document to the given output stream, with options.
+	 * @param document
+	 * @param os
+	 * @param options - An option value from this class that specifies export parameters.
+	 * @throws XMLException
+	 */
 	public static void write(Document document, OutputStream os, int options) throws XMLException
 	{
 		_indentCount = 0;
