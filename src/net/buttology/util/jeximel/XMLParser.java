@@ -29,7 +29,7 @@ import java.util.Scanner;
  * This utility class can read and write XML files. When reading XML files, 
  * it returns a Document containing the XML data. Similarly, writing an 
  * XML file takes a Document as input and writes the contents to a file on disk.
- * @version 1.1.1
+ * @version 1.1.2
  * @author Mudbill
  */
 public class XMLParser {
@@ -142,7 +142,7 @@ public class XMLParser {
 		{
 			if(!e.hasText())
 			{
-				if(optionAttrNewline && e.hasAttributes())
+				if((optionAttrNewline || optionAttrNewlineAll) && e.hasAttributes())
 					tag += "\n" + tabs;
 				else
 					tag += " ";
