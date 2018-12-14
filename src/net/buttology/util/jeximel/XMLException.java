@@ -20,8 +20,8 @@ package net.buttology.util.jeximel;
 
 /**
  * This class represents a custom exception occurring in the XMLParser.
+ * @version 1.0.0
  * @author Mudbill
- *
  */
 public class XMLException extends Exception {
 

@@ -29,11 +29,14 @@ import java.util.Scanner;
  * This utility class can read and write XML files. When reading XML files, 
  * it returns a Document containing the XML data. Similarly, writing an 
  * XML file takes a Document as input and writes the contents to a file on disk.
- * @version 1.0.0
+ * @version 1.1.0
  * @author Mudbill
  */
 public class XMLParser {
 
+	public static final int OPTION_ATTR_NEWLINE_INLINE = 0x1;
+	public static final int OPTION_ATTR_NEWLINE_ALL = 0x2;
+	
 	/** Change this to true to print debug messages in the standard output. */
 	public static boolean debug = false;
 	private static int _indentCount = 0;
@@ -63,13 +66,7 @@ public class XMLParser {
 		return d;
 	}
 	
-	/**
-	 * Write the given XML document to the given output stream.
-	 * @param document
-	 * @param os
-	 * @throws XMLException
-	 */
-	public static void write(Document document, OutputStream os) throws XMLException
+	public static void write(Document document, OutputStream os, int options) throws XMLException
 	{
 		_indentCount = 0;
 		debug("Writing XML document to file...");
@@ -94,7 +91,7 @@ public class XMLParser {
 						
 			for(Element e : document.getChildren())
 			{
-				writeElement(e, os);
+				writeElement(e, os, options);
 			}
 		}
 		catch(IOException e)
@@ -105,20 +102,42 @@ public class XMLParser {
 		debug("Finished writing XML file in %d ms.", (System.currentTimeMillis() - startTime));
 	}
 	
-	private static void writeElement(Element e, OutputStream os) throws IOException
+	/**
+	 * Write the given XML document to the given output stream.
+	 * @param document
+	 * @param os
+	 * @throws XMLException
+	 */
+	public static void write(Document document, OutputStream os) throws XMLException
 	{
+		write(document, os, 0);
+	}
+	
+	private static void writeElement(Element e, OutputStream os, int options) throws IOException
+	{
+		boolean optionAttrNewline = (options & OPTION_ATTR_NEWLINE_INLINE) == OPTION_ATTR_NEWLINE_INLINE;
+		boolean optionAttrNewlineAll = (options & OPTION_ATTR_NEWLINE_ALL) == OPTION_ATTR_NEWLINE_ALL;
+
 		String tabs = getTabs();
 		String tag = tabs + "<" + e.getName();
 		for(String s : e.getAttributes().keySet())
 		{
-			tag += " " + s + "=\"" + e.getAttribute(s) + "\"";
+			if((optionAttrNewline && !e.hasChildren() && !e.hasText()) || optionAttrNewlineAll)
+				tag += "\n" + tabs + "\t";
+			else
+				tag += " ";
+			tag += s + "=\"" + e.getAttribute(s) + "\"";
 		}
 		
 		if(!e.hasChildren())
 		{
 			if(!e.hasText())
 			{
-				tag += " />\n";				
+				if(optionAttrNewline && e.hasAttributes())
+					tag += "\n" + tabs;
+				else
+					tag += " ";
+				tag += "/>\n";
 			}
 			else
 			{
@@ -128,12 +147,14 @@ public class XMLParser {
 		else
 		{
 			_indentCount++;
+			if((optionAttrNewline && !e.hasChildren() && !e.hasText()) || optionAttrNewlineAll && e.hasAttributes())
+				tag += "\n" + tabs;
 			tag += ">\n";
 		}
 		os.write(tag.getBytes());
 		for(Element child : e.getChildren())
 		{
-			writeElement(child, os);
+			writeElement(child, os, options);
 		}
 		if(e.hasChildren())
 		{

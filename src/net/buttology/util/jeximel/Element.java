@@ -25,9 +25,9 @@ import java.util.Map;
 
 /**
  * This class represents an element in the XML tree hierarchy. An element can have a series of attributes,
- * as well as sub-element children. Elements can also contain text nodes.
+ * as well as child elements. Elements can also contain text nodes.
+ * @version 1.0.0
  * @author Mudbill
- *
  */
 public class Element {
 	
