@@ -41,7 +41,7 @@ orphan.setName("Adopted");
 // Text nodes can be set
 orphan.setText("This element has a text node.");
 // Setting declaration information is also possible
-document.setEncoding("UTF-16");
+document.setEncoding("UTF-16"); //PS: this doesn't actually change encoding, just what is printed. Perhaps that'll come later.
 
 // Okay, let's write this to a file.
 File outputFile = new File("path/to/file");
