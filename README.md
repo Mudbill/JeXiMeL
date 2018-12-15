@@ -72,6 +72,8 @@ String text = secondChild.getChild("Adopted").getText();
 for(Element child : secondChild.getChildren()) {...}
 ```
 
+I guess that about sums it up, really.
+
 ## Other
 
 Why did I make this when there are already well established XML parsers for Java, even built-in? Maybe I'm stupid. I just felt like it. I guess I like doing things my way, and this was perhaps another chance for me to learn more through experience. 
