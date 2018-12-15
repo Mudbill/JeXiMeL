@@ -61,7 +61,7 @@ Here we have the output of the file.
 The reverse process can be used for reading XML files.
 
 ```java
-File inputFile = new File("path/to/file);
+File inputFile = new File("path/to/file");
 // Load the file into this document.
 Document document = XMLParser.read(new FileInputStream(inputFile));
 // Now to get some data...
