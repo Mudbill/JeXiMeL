@@ -29,7 +29,7 @@ import java.util.Scanner;
  * This utility class can read and write XML files. When reading XML files, 
  * it returns a Document containing the XML data. Similarly, writing an 
  * XML file takes a Document as input and writes the contents to a file on disk.
- * @version 1.1.2
+ * @version 1.1.3
  * @author Mudbill
  */
 public class XMLParser {
@@ -49,7 +49,8 @@ public class XMLParser {
 	 * @return
 	 * @throws XMLException
 	 */
-	public static Document read(InputStream is) throws XMLException {
+	public static Document read(InputStream is) throws XMLException
+	{
 		debug("Reading XML file...");
 		long startTime = System.currentTimeMillis();
 		
@@ -60,7 +61,18 @@ public class XMLParser {
 		
 		debug("Parsing XML data...");
 		startTime = System.currentTimeMillis();
-		x.parse(content);
+		
+		if (content.isEmpty()) throw new XMLException("File is empty.");
+		
+		try
+		{
+			x.parse(content);
+		}
+		catch (NullPointerException npe)
+		{
+			throw new XMLException("Failed parsing contents of file, is it valid XML?");
+		}
+		
 		debug("Finished parsing XML data in %d ms.", System.currentTimeMillis() - startTime);
 		
 		Document d = x._root;
@@ -86,24 +98,24 @@ public class XMLParser {
 			String version = document.getVersion();
 			String encoding = document.getEncoding();
 			boolean standalone = document.getStandalone();
-			if(version != null || encoding != null || !standalone)
+			if (version != null || encoding != null || !standalone)
 			{
 				String declaration = "<?xml";
-				if(version != null) declaration += " version=\"" + version + "\"";
-				if(encoding != null) declaration += " encoding=\"" + encoding + "\"";
-				if(!standalone) declaration += " standalone=\"" + standalone + "\"";
+				if (version != null) declaration += " version=\"" + version + "\"";
+				if (encoding != null) declaration += " encoding=\"" + encoding + "\"";
+				if (!standalone) declaration += " standalone=\"" + standalone + "\"";
 				declaration += " ?>";
 				debug("Writing declaration: " + declaration);
 				os.write(declaration.getBytes());
 				os.write('\n');
 			}
 						
-			for(Element e : document.getChildren())
+			for (Element e : document.getChildren())
 			{
 				writeElement(e, os, options);
 			}
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new XMLException("Failed to write XML file.", e);
 		}
@@ -131,18 +143,18 @@ public class XMLParser {
 		String tag = tabs + "<" + e.getName();
 		for(String s : e.getAttributes().keySet())
 		{
-			if((optionAttrNewline && !e.hasChildren() && !e.hasText()) || optionAttrNewlineAll)
+			if ((optionAttrNewline && !e.hasChildren() && !e.hasText()) || optionAttrNewlineAll)
 				tag += "\n" + tabs + "\t";
 			else
 				tag += " ";
 			tag += s + "=\"" + e.getAttribute(s) + "\"";
 		}
 		
-		if(!e.hasChildren())
+		if (!e.hasChildren())
 		{
-			if(!e.hasText())
+			if (!e.hasText())
 			{
-				if((optionAttrNewline || optionAttrNewlineAll) && e.hasAttributes())
+				if ((optionAttrNewline || optionAttrNewlineAll) && e.hasAttributes())
 					tag += "\n" + tabs;
 				else
 					tag += " ";
@@ -156,16 +168,16 @@ public class XMLParser {
 		else
 		{
 			_indentCount++;
-			if((optionAttrNewline && !e.hasChildren() && !e.hasText()) || optionAttrNewlineAll && e.hasAttributes())
+			if ((optionAttrNewline && !e.hasChildren() && !e.hasText()) || optionAttrNewlineAll && e.hasAttributes())
 				tag += "\n" + tabs;
 			tag += ">\n";
 		}
 		os.write(tag.getBytes());
-		for(Element child : e.getChildren())
+		for (Element child : e.getChildren())
 		{
 			writeElement(child, os, options);
 		}
-		if(e.hasChildren())
+		if (e.hasChildren())
 		{
 			_indentCount--;
 			os.write((tabs + "</" + e.getName() + ">\n").getBytes());
@@ -175,7 +187,7 @@ public class XMLParser {
 	private static String getTabs()
 	{
 		String tab = "";
-		for(int i = 0; i < _indentCount; i++)
+		for (int i = 0; i < _indentCount; i++)
 			tab += "\t";
 		return tab;
 	}
@@ -215,12 +227,12 @@ public class XMLParser {
 
 		try
 		{			
-			while(scanner.hasNextLine())
+			while (scanner.hasNextLine())
 			{
 				sb.append(scanner.nextLine());
 			}
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -241,9 +253,9 @@ public class XMLParser {
 		String tag = getNextTag(content);
 		
 		// Check for a declaration and process it if found.
-		if(tag.charAt(0) == '?')
+		if (tag.charAt(0) == '?')
 		{
-			if(tag.startsWith("?xml")
+			if (tag.startsWith("?xml")
 			&& tag.endsWith("?"))
 			{				
 				debug("Declaration line: " + tag);
@@ -262,13 +274,13 @@ public class XMLParser {
 			Element e = processElementFromString(tag);
 			String text;
 			text = getText(content).trim();
-			if(!text.isEmpty())
+			if (!text.isEmpty())
 			{
 //				debug("\tTEXT ("+_parseStop+"): " + text);
 				e.setText(text);
 			}
 		}
-		while((tag = getNextTag(content)) != null);
+		while ((tag = getNextTag(content)) != null);
 	}
 	
 	private String getText(String content) throws XMLException
@@ -278,7 +290,7 @@ public class XMLParser {
 			_parseStart = _parseStop + 1;
 			int parseStop = content.indexOf('<', _parseStart);
 //			System.out.println(_parseStart + "-" + parseStop);
-			if(parseStop == -1 || _parseStart == -1 || parseStop <= _parseStart) return "";
+			if (parseStop == -1 || _parseStart == -1 || parseStop <= _parseStart) return "";
 			String text = content.substring(_parseStart, parseStop);
 			return formatTextFromXml(text);
 		}
@@ -292,10 +304,10 @@ public class XMLParser {
 	{
 		try
 		{
-			if(_parseStart == -1 || _parseStop == -1)
+			if (_parseStart == -1 || _parseStop == -1)
 				return null;
 			
-			if(_isComment)
+			if (_isComment)
 			{
 				_parseStop = content.indexOf("-->", _parseStart);
 				_isComment = false;
@@ -303,7 +315,7 @@ public class XMLParser {
 			
 			_parseStart = content.indexOf('<', _parseStop);
 			_parseStop = content.indexOf('>', _parseStart);
-			if(_parseStop == -1 || _parseStart == -1 || _parseStop <= _parseStart)
+			if (_parseStop == -1 || _parseStart == -1 || _parseStop <= _parseStart)
 				return null;
 			String tag = content.substring(_parseStart + 1, _parseStop);
 			return tag;
@@ -319,9 +331,9 @@ public class XMLParser {
 		try
 		{
 			// Check for comments
-			if(raw.startsWith("!--"))
+			if (raw.startsWith("!--"))
 			{
-				if(raw.endsWith("--"))
+				if (raw.endsWith("--"))
 				{
 					debug("Encountered an in-line comment, ignoring.");
 					return null;
@@ -333,12 +345,12 @@ public class XMLParser {
 			
 			int lowestIdx = Integer.MAX_VALUE;
 			int nextWhitespace = getNextWhitespaceIndex(raw, 0);
-			if(nextWhitespace != -1)
+			if (nextWhitespace != -1)
 				lowestIdx = nextWhitespace;
 			
 			String name = raw.substring(0, Math.min(lowestIdx, raw.length()));
 			
-			if(name.charAt(0) == '/')
+			if (name.charAt(0) == '/')
 			{
 				// This is a closing element, so go up one level in the hierarchy.
 				_parent = _parent.getParent();
@@ -348,11 +360,11 @@ public class XMLParser {
 			{
 				// This is a new opening element
 				Element element = new Element(_parent, name);
-				if(raw.charAt(raw.length() - 1) != '/')
+				if (raw.charAt(raw.length() - 1) != '/')
 					// This is not an in-line element, so increment the hierarchy level.
 					_parent = element;
 				Map<String, String> attributes = parseAttributes(raw);
-				if(attributes != null)
+				if (attributes != null)
 				{
 					debug("Setting attributes: " + attributes);
 					element.setAttributes(attributes);
@@ -360,7 +372,7 @@ public class XMLParser {
 				return element;
 			}
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			throw new XMLException("Failed parsing element from XML data.", e);
 		}
@@ -368,7 +380,7 @@ public class XMLParser {
 	
 	private Map<String, String> parseAttributes(String raw)
 	{
-		if(raw.trim().isEmpty()) return null;
+		if (raw.trim().isEmpty()) return null;
 		Map<String, String> attribs = new HashMap<String, String>();
 		int parseStart = 0;
 		int parseStop = 0;
@@ -376,7 +388,7 @@ public class XMLParser {
 		{
 			parseStart = this.getNextWhitespaceIndex(raw, parseStop);
 			parseStop = raw.indexOf('=', parseStart);
-			if(parseStart == -1 || parseStop == -1)
+			if (parseStart == -1 || parseStop == -1)
 				break;
 			String attribName = raw.substring(parseStart, parseStop).trim();
 			parseStart = raw.indexOf('"', parseStop) + 1;
@@ -385,8 +397,8 @@ public class XMLParser {
 			debug("Found attrib %s=%s", attribName, attribValue);
 			attribs.put(attribName, attribValue);
 		}
-		while(raw.indexOf('=', parseStop) != -1);
-		if(attribs.isEmpty()) 
+		while (raw.indexOf('=', parseStop) != -1);
+		if (attribs.isEmpty()) 
 			return null;
 		return attribs;
 	}
@@ -396,9 +408,9 @@ public class XMLParser {
 		int idxSpace = raw.indexOf(' ', startIndex);
 		int idxTab = raw.indexOf('\t', startIndex);
 		int idxNl = raw.indexOf('\n', startIndex);
-		if(idxSpace == -1) idxSpace = raw.length();
-		if(idxTab == -1) idxTab = raw.length();
-		if(idxNl == -1) idxNl = raw.length();
+		if (idxSpace == -1) idxSpace = raw.length();
+		if (idxTab == -1) idxTab = raw.length();
+		if (idxNl == -1) idxNl = raw.length();
 		int idx = Math.min(idxSpace, Math.min(idxTab, idxNl));
 		return idx;
 	}
@@ -406,11 +418,11 @@ public class XMLParser {
 	private void processDeclaration(String raw) throws XMLException
 	{
 		Map<String, String> declar = parseAttributes(raw);
-		if(declar != null)
+		if (declar != null)
 		{
-			if(declar.containsKey("version")) this._root.setVersion(declar.get("version"));
-			if(declar.containsKey("encoding")) this._root.setEncoding(declar.get("encoding"));
-			if(declar.containsKey("standalone")) this._root.setStandalone(Boolean.parseBoolean(declar.get("standalone")));
+			if (declar.containsKey("version")) this._root.setVersion(declar.get("version"));
+			if (declar.containsKey("encoding")) this._root.setEncoding(declar.get("encoding"));
+			if (declar.containsKey("standalone")) this._root.setStandalone(Boolean.parseBoolean(declar.get("standalone")));
 		}
 	}
 	
@@ -422,6 +434,6 @@ public class XMLParser {
 
 	private static void debug(String msg, Object... args)
 	{
-		if(debug) System.out.printf("XML: " + msg + "\n", args);
+		if (debug) System.out.printf("XML: " + msg + "\n", args);
 	}
 }

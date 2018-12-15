@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * This class represents an element in the XML tree hierarchy. An element can have a series of attributes,
  * as well as child elements. Elements can also contain text nodes.
- * @version 1.0.0
+ * @version 1.0.1
  * @author Mudbill
  */
 public class Element {
@@ -57,7 +57,7 @@ public class Element {
 		this.name = name;
 		this.children = new HashMap<Integer, Element>();
 		this.attributes = new HashMap<String, String>();
-		if(parent != null) {
+		if (parent != null) {
 			this._id = parent.children.size();
 			while(parent.children.containsKey(_id)) {
 				_id++;
@@ -94,8 +94,8 @@ public class Element {
 	 * @return
 	 */
 	public boolean hasChild(String name) {
-		for(Element e : children.values()) {
-			if(e.getName().equals(name)) return true;
+		for (Element e : children.values()) {
+			if (e.getName().equals(name)) return true;
 		}
 		return false;
 	}
@@ -106,8 +106,8 @@ public class Element {
 	 * @return
 	 */
 	public Element getChild(String name) {
-		for(Element e : children.values()) {
-			if(e.getName().equals(name)) return e;
+		for (Element e : children.values()) {
+			if (e.getName().equals(name)) return e;
 		}
 		debug("No '%s' child found in '%s'", name, this.name);
 		return null;
@@ -119,8 +119,8 @@ public class Element {
 	 * @return
 	 */
 	public Element getChildByAttrib(String attrib) {
-		for(Element e : children.values()) {
-			if(e.getAttributes().containsKey(attrib)) return e;
+		for (Element e : children.values()) {
+			if (e.getAttributes().containsKey(attrib)) return e;
 		}
 		debug("No child with attrib '%s' found in '%s'", attrib, this.name);
 		return null;
@@ -133,9 +133,9 @@ public class Element {
 	 * @return
 	 */
 	public Element getChildByAttrib(String element, String attrib) {
-		for(Element e : children.values()) {
-			if(!e.getName().equals(element)) continue;
-			if(e.getAttributes().containsKey(attrib)) return e;
+		for (Element e : children.values()) {
+			if (!e.getName().equals(element)) continue;
+			if (e.getAttributes().containsKey(attrib)) return e;
 		}
 		debug("No child with attrib '%s' and name '%s' found in '%s'", attrib, element, this.name);
 		return null;
@@ -149,11 +149,11 @@ public class Element {
 	 * @return
 	 */
 	public Element getChildByAttrib(String element, String attribName, String attribValue) {
-		for(Element e : children.values()) {
-			if(!e.getName().equals(element)) continue;
-			for(String s : e.getAttributes().keySet()) {
-				if(!s.equals(attribName)) continue;
-				if(s.equals(attribValue)) return e;
+		for (Element e : children.values()) {
+			if (!e.getName().equals(element)) continue;
+			for (String s : e.getAttributes().keySet()) {
+				if (!s.equals(attribName)) continue;
+				if (s.equals(attribValue)) return e;
 			}
 		}
 		debug("No child with attrib '%s' set to '%s' and name '%s' found in '%s'", attribName, attribValue, element, this.name);
@@ -167,8 +167,8 @@ public class Element {
 	 */
 	public Element[] getChildren(String name) {
 		List<Element> list = new ArrayList<Element>();
-		for(Element e : children.values()) {
-			if(e.getName().equals(name)) {
+		for (Element e : children.values()) {
+			if (e.getName().equals(name)) {
 				list.add(e);
 			}
 		}
@@ -200,7 +200,7 @@ public class Element {
 	 * @return
 	 */
 	public String getAttribute(String name) {
-		if(attributes.containsKey(name)) {
+		if (attributes.containsKey(name)) {
 			return attributes.get(name);
 		}
 		debug("No attribute '%s' found in '%s'", name, this.name);
@@ -269,11 +269,11 @@ public class Element {
 	 * @param parent
 	 */
 	public void setParent(Element parent) {
-		if(this.parent != null) {
+		if (this.parent != null) {
 			this.parent.children.remove(this._id);
 		}
 		this._id = parent.children.size();
-		while(parent.children.containsKey(_id)) {
+		while (parent.children.containsKey(_id)) {
 			_id++;
 		}
 		parent.addChild(this);
@@ -334,8 +334,8 @@ public class Element {
 	 * @param name
 	 */
 	public void removeChild(String name) {
-		for(Element e : children.values()) {
-			if(e.getName().equals(name)) children.remove(e._id);
+		for (Element e : children.values()) {
+			if (e.getName().equals(name)) children.remove(e._id);
 		}
 	}
 	
@@ -347,7 +347,7 @@ public class Element {
 		StringBuilder sb = new StringBuilder();
 		Element parent = this.parent;
 		sb.append(name);
-		while(parent != null) {
+		while (parent != null) {
 			sb.insert(0, parent.getName() + " -> ");
 			parent = parent.getParent();
 		}
@@ -360,21 +360,21 @@ public class Element {
 	 */
 	public String toString() {
 		String output = name + "(";
-		for(String s : attributes.keySet()) {
+		for (String s : attributes.keySet()) {
 			output += s + "=" + attributes.get(s) + ",";
 		}
-		if(!attributes.isEmpty()) output = output.substring(0, output.length() - 1);
+		if (!attributes.isEmpty()) output = output.substring(0, output.length() - 1);
 		output += "){";
-		for(Element e : children.values()) {
+		for (Element e : children.values()) {
 			output += e.getName() + ",";
 		}
-		if(!children.isEmpty()) output = output.substring(0, output.length() - 1);
+		if (!children.isEmpty()) output = output.substring(0, output.length() - 1);
 		output += "}";
 		return output;
 	}
 	
 	private void debug(String msg, Object... args) {
-		if(_debug) System.out.printf("XML: " + msg + "\n", args);
+		if (_debug) System.out.printf("XML: " + msg + "\n", args);
 	}
 
 }
