@@ -22,6 +22,58 @@ And although it works with all XML files I have tested, it probably doesn't adhe
 After importing `XMLParser`, you can call the static method `read` or `write` to access files on the disk. If you want to construct an XML document programmatically, you can create a new `Document` instance and start adding `Element`s. Functions are documented 
 and fairly straight forward. Functions include things like `getAttributes` and `getChildren` and `getName` and `getText`. You get the idea.
 
+To be more in-depth, here's how you can create an XML file programmatically:
+```java
+// Create a new, empty XML document.
+Document document = new Document();
+// Adding a child element to the document.
+document.addChild(new Element("FirstChild"));
+// A parent element can also be assigned when creating a new element, 
+// if you want to assign more information to it.
+Element anElement = new Element(document.getChild("FirstChild"), "SecondChild");
+// Attributes can be added
+anElement.addAttribute("FirstAttrib", "true");
+// Orphaned elements aren't included in the document, so be careful
+Element orphan = new Element("Orphan");
+// But you can edit the parent later
+orphan.setParent(anElement);
+orphan.setName("Adopted");
+// Text nodes can be set
+orphan.setText("This element has a text node.");
+// Setting declaration information is also possible
+document.setEncoding("UTF-16"); //PS: this doesn't actually change encoding, just what is printed. Perhaps that'll come later.
+
+// Okay, let's write this to a file.
+File outputFile = new File("path/to/file");
+XMLParser.write(document, new FileOutputStream(outputFile));
+```
+
+Here we have the output of the file.
+```xml
+<?xml encoding="UTF-16" ?>
+<FirstChild>
+	<SecondChild FirstAttrib="true">
+		<Adopted>This element has a text node.</Adopted>
+	</SecondChild>
+</FirstChild>
+```
+
+The reverse process can be used for reading XML files.
+
+```java
+File inputFile = new File("path/to/file");
+// Load the file into this document.
+Document document = XMLParser.read(new FileInputStream(inputFile));
+// Now to get some data...
+Element secondChild = document.getChild("FirstChild").getChild("SecondChild");
+String firstAttrib = secondChild.getAttribute("FirstAttrib");
+String text = secondChild.getChild("Adopted").getText();
+// If you have several children somewhere, you can loop through them
+for(Element child : secondChild.getChildren()) {...}
+```
+
+I guess that about sums it up, really.
+
 ## Other
 
 Why did I make this when there are already well established XML parsers for Java, even built-in? Maybe I'm stupid. I just felt like it. I guess I like doing things my way, and this was perhaps another chance for me to learn more through experience. 
