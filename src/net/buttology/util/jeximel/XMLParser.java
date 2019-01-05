@@ -21,6 +21,7 @@ package net.buttology.util.jeximel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -29,7 +30,7 @@ import java.util.Scanner;
  * This utility class can read and write XML files. When reading XML files, 
  * it returns a Document containing the XML data. Similarly, writing an 
  * XML file takes a Document as input and writes the contents to a file on disk.
- * @version 1.1.3
+ * @version 1.2.0
  * @author Mudbill
  */
 public class XMLParser {
@@ -44,19 +45,30 @@ public class XMLParser {
 	private static int _indentCount = 0;
 	
 	/**
-	 * Read an XML document from the given input stream.
-	 * @param is
+	 * Read an XML document from the given input stream using the system's default underlying charset.
+	 * @param is - The input stream used to read the file
 	 * @return
 	 * @throws XMLException
 	 */
-	public static Document read(InputStream is) throws XMLException
+	public static Document read(InputStream is) throws XMLException {
+		return read(is, null);
+	}
+	
+	/**
+	 * Read an XML document from the given input stream.
+	 * @param is - The input stream used to read the file
+	 * @param charset - The charset used to parse characters.
+	 * @return
+	 * @throws XMLException
+	 */
+	public static Document read(InputStream is, String charset) throws XMLException
 	{
 		debug("Reading XML file...");
 		long startTime = System.currentTimeMillis();
 		
 		XMLParser x = new XMLParser();
 		x.prepare();
-		String content = x.readStream(is);
+		String content = x.readStream(is, charset);
 		debug("Finished reading XML file in %d ms.", System.currentTimeMillis() - startTime);
 		
 		debug("Parsing XML data...");
@@ -87,7 +99,7 @@ public class XMLParser {
 	 * @param options - An option value from this class that specifies export parameters.
 	 * @throws XMLException
 	 */
-	public static void write(Document document, OutputStream os, int options) throws XMLException
+	public static void write(Document document, OutputStream os, String charset, int options) throws XMLException
 	{
 		_indentCount = 0;
 		debug("Writing XML document to file...");
@@ -95,6 +107,10 @@ public class XMLParser {
 		
 		try
 		{			
+			OutputStreamWriter osw = charset != null 
+					? new OutputStreamWriter(os, charset) 
+					: new OutputStreamWriter(os);
+			
 			String version = document.getVersion();
 			String encoding = document.getEncoding();
 			boolean standalone = document.getStandalone();
@@ -106,14 +122,15 @@ public class XMLParser {
 				if (!standalone) declaration += " standalone=\"" + standalone + "\"";
 				declaration += " ?>";
 				debug("Writing declaration: " + declaration);
-				os.write(declaration.getBytes());
-				os.write('\n');
+				osw.write(declaration);
+				osw.write('\n');
 			}
 						
 			for (Element e : document.getChildren())
 			{
-				writeElement(e, os, options);
+				writeElement(e, osw, options);
 			}
+			osw.close();
 		}
 		catch (IOException e)
 		{
@@ -129,12 +146,23 @@ public class XMLParser {
 	 * @param os
 	 * @throws XMLException
 	 */
-	public static void write(Document document, OutputStream os) throws XMLException
+	public static void write(Document document, OutputStream os, String charset) throws XMLException
 	{
-		write(document, os, 0);
+		write(document, os, charset, 0);
 	}
 	
-	private static void writeElement(Element e, OutputStream os, int options) throws IOException
+	/**
+	 * Write the given XML document to the given output stream using the default charset.
+	 * @param document
+	 * @param os
+	 * @throws XMLException
+	 */
+	public static void write(Document document, OutputStream os) throws XMLException
+	{
+		write(document, os, null, 0);
+	}
+	
+	private static void writeElement(Element e, OutputStreamWriter osw, int options) throws IOException
 	{
 		boolean optionAttrNewline = (options & OPTION_ATTR_NEWLINE_INLINE) == OPTION_ATTR_NEWLINE_INLINE;
 		boolean optionAttrNewlineAll = (options & OPTION_ATTR_NEWLINE_ALL) == OPTION_ATTR_NEWLINE_ALL;
@@ -172,15 +200,15 @@ public class XMLParser {
 				tag += "\n" + tabs;
 			tag += ">\n";
 		}
-		os.write(tag.getBytes());
+		osw.write(tag);
 		for (Element child : e.getChildren())
 		{
-			writeElement(child, os, options);
+			writeElement(child, osw, options);
 		}
 		if (e.hasChildren())
 		{
 			_indentCount--;
-			os.write((tabs + "</" + e.getName() + ">\n").getBytes());
+			osw.write(tabs + "</" + e.getName() + ">\n");
 		}
 	}
 	
@@ -218,11 +246,14 @@ public class XMLParser {
 	private Element 	_parent;
 	private boolean		_isComment = false;
 	
-	private String readStream(InputStream is) throws NullPointerException, XMLException
+	private String readStream(InputStream is, String charset) throws NullPointerException, XMLException
 	{
-		if(is == null) throw new NullPointerException();
+		if(is == null) throw new NullPointerException("Input stream cannot be null.");
 		
-		Scanner scanner = new Scanner(is);
+		Scanner scanner;
+		if(charset != null) scanner = new Scanner(is, charset);
+		else scanner = new Scanner(is);
+		
 		StringBuilder sb = new StringBuilder();
 
 		try
