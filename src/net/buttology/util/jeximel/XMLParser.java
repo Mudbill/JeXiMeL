@@ -30,7 +30,7 @@ import java.util.Scanner;
  * This utility class can read and write XML files. When reading XML files, 
  * it returns a Document containing the XML data. Similarly, writing an 
  * XML file takes a Document as input and writes the contents to a file on disk.
- * @version 1.2.0
+ * @version 1.2.1
  * @author Mudbill
  */
 public class XMLParser {
@@ -42,7 +42,17 @@ public class XMLParser {
 	
 	/** Change this to true to print debug messages in the standard output. */
 	public static boolean debug = false;
+	private static String charset;
+	
 	private static int _indentCount = 0;
+	
+	/**
+	 * Sets the global charset used by this class for reading and writing tasks. If set to null, system default is used.
+	 * @param charset
+	 */
+	public static void setCharset(String charset) {
+		XMLParser.charset = charset;
+	}
 	
 	/**
 	 * Read an XML document from the given input stream using the system's default underlying charset.
@@ -107,9 +117,10 @@ public class XMLParser {
 		
 		try
 		{			
-			OutputStreamWriter osw = charset != null 
-					? new OutputStreamWriter(os, charset) 
-					: new OutputStreamWriter(os);
+			OutputStreamWriter osw;
+			if(charset != null) osw = new OutputStreamWriter(os, charset);
+			else if(XMLParser.charset != null) osw = new OutputStreamWriter(os, XMLParser.charset);
+			else osw = new OutputStreamWriter(os);
 			
 			String version = document.getVersion();
 			String encoding = document.getEncoding();
@@ -144,6 +155,19 @@ public class XMLParser {
 	 * Write the given XML document to the given output stream.
 	 * @param document
 	 * @param os
+	 * @param options
+	 * @throws XMLException
+	 */
+	public static void write(Document document, OutputStream os, int options) throws XMLException
+	{
+		write(document, os, null, options);
+	}
+	
+	/**
+	 * Write the given XML document to the given output stream.
+	 * @param document
+	 * @param os
+	 * @param charset
 	 * @throws XMLException
 	 */
 	public static void write(Document document, OutputStream os, String charset) throws XMLException
@@ -252,6 +276,7 @@ public class XMLParser {
 		
 		Scanner scanner;
 		if(charset != null) scanner = new Scanner(is, charset);
+		else if(XMLParser.charset != null) scanner = new Scanner(is, XMLParser.charset);
 		else scanner = new Scanner(is);
 		
 		StringBuilder sb = new StringBuilder();
