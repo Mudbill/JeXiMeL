@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * This class represents an element in the XML tree hierarchy. An element can have a series of attributes,
  * as well as child elements. Elements can also contain text nodes.
- * @version 1.0.1
+ * @version 1.0.2
  * @author Mudbill
  */
 public class Element {
@@ -73,8 +73,13 @@ public class Element {
 	 * @return
 	 */
 	public Element addChild(Element child) {
+//		child.setParent(this);
+		child._id = children.size();
+		while(children.containsKey(child._id)) {
+			child._id++;
+		}
 		children.put(child._id, child);
-		debug("Adding '%s' to '%s'", child.name, this.name);
+		debug("Adding '%s' [ID: %d] to '%s'", child.name, child._id, this.name);
 		return child;
 	}
 	
@@ -84,7 +89,7 @@ public class Element {
 	 * @return
 	 */
 	public Element addChild(String name) {
-		Element child = new Element(this.parent, name);
+		Element child = new Element(name);
 		return addChild(child);
 	}
 	

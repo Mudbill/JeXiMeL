@@ -22,7 +22,7 @@ package net.buttology.util.jeximel;
  * This class represents an entire XML document, including the XML declaration if 
  * present and all the child elements that come directly under the top level. 
  * Elements can be added, modified and removed at request.
- * @version 1.0.0
+ * @version 1.0.1
  * @author Mudbill
  */
 public class Document
@@ -44,6 +44,14 @@ public class Document
 	 * @param child
 	 */
 	public void addChild(Element child) {
+		this.root.addChild(child);
+	}
+	
+	/**
+	 * Add an element to the document.
+	 * @param child
+	 */
+	public void addChild(String child) {
 		this.root.addChild(child);
 	}
 	
