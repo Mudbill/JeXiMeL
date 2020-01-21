@@ -34,7 +34,7 @@ public class Element {
 	private int _id = -1;
 	private boolean _debug = XMLParser.debug;
 	private String name;
-	private String text;
+	private String text = "";
 	private Element parent;
 	private Map<Integer, Element> children;
 	private Map<String, String> attributes;
