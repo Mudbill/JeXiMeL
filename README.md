@@ -1,7 +1,6 @@
 # JeXiMeL
 
-JeXiMeL is a small, light-weight XML parser for Java. There are many like it but this one is mine. It supports the basic needs that an XML parser should have. You can read and write files from XML documents, or create a document in code and write it to file 
-later. Use it if you wish.
+JeXiMeL is my own little XML parser for Java. There are many like it but this one is mine. You can read and write files from XML documents, or create a document in code and write it to file later. Use it if you wish, or use something better. Up to you.
 
 ## Features
 
